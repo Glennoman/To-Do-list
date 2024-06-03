@@ -89,6 +89,8 @@ input [type="text"]::placeholder {
 .todo-container {
     display: flex;
     gap: 1rem;
+    margin: 1rem;
+    align-items: center;
 }
 
 ul {
@@ -111,6 +113,25 @@ li {
     align-items: center;
 }
 
+#todoList .disabled {
+    color: #8f98a8;
+}
+
+.delete-button {
+    background-color: var(--purple);
+    color: white;
+    border-radius: 0.3rem;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    position: relative;
+    left: 10rem;
+}
+
+.delete-button:hover {
+    background-color: rgb(102, 32, 158)
+}
+s
 /* This will cross out the text */
 .disabled {
     display: flex;

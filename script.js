@@ -5,7 +5,7 @@
 let todo = JSON.parse(localStorage.getItem("todo")) || [];
 const todoInput = document.getElementById("todoInput");
 const todoList = document.getElementById("todoList");
-const todoCount = document.getElementById("todoCount");
+const todoCount = document.getElementById("counter-container span");
 const addButton = document.querySelector(".btn");
 const deleteButton = document.getElementById("deleteButton");
 
@@ -27,21 +27,37 @@ const addTodo = () => {
     // trim() removes excess space when registering a value
     const newTask = todoInput.value.trim();
     if(newTask !== ""){
-        todo.push({
+        // Add a unique id to each todo item
+        const newTodo = {
+            id: Date.now(), //Using the current timestamp as unique ID
             text: newTask,
             disabled: false,
-        });
+        };
+        // The new todo item is added to the todo array using the push method
+        todo.push(newTodo);
+        saveToLocalStorage();
         todoInput.value = "";
         // displayTodos();
+        displayTodos();
     }
 }
 
-const removeTodo = () => {
-
+const removeTodo = (id) => {
+    // Find the index of the todo item with the matching id
+    const index = todoInput.findindex(item => item.id === id);
+    if (index !== -1) {
+        // Remove the item from array
+        todo.splice(index, 1);
+        // Save the updated array to local storage and update list
+        saveToLocalStorage();
+        displayTodos();
+    }
 }
 
-const toggleTask = () => {
-    
+const toggleTask = (index) => {
+    todo[index].disabled = !todo[index].disabled;
+    saveToLocalStorage();
+    displayTodos();
 }
 
 const displayTodos = () => {
@@ -49,27 +65,53 @@ const displayTodos = () => {
     todoList.innerHTML = "";
 
     // Iterate over each item in the todo array
-    todo.forEach((item, index) => {
+    todo.forEach((item) => {
 
-        // New paragraph element to hold todo item
-        const p = document.createElement("p");
+        // Creating new div element to hold the todo item and its controls
+        const todoContainer = document.createElement("div");
+        todoContainer.classList.add("todo-container");
 
-        // Set the inner HTML of the paragraph element to create a todo item container
-        p.innerHTML = 
-        // If item.disabled is true, the checkbox is checked
-        `
-        <div class="todo-container">  
-            <input type="checkbox" class="todo-checkbox" id="input-${index}" ${item.disabled 
-                ? "checked" : ""}>
-        <p id="todo-${index} class="${item.disabled ? "disabled" : ""}>
-        onclick="editTask(${index})">${item.text}</p>
-        </div>
-        `
-        // ABOVE// p element has an onclick attribute set to call editTask(${index}) when clicked. // ABOVE //
-
-        p.querySelector(".todo-checkbox").addEventListener("change", () => {
-            toggleTask(index);
+        // Creating checkbox for todo item
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.classList.add("todo-checkbox"); // Adding to class for styling
+        checkbox.checked = item.disabled; // Setting checked state based on the item's disabled property
+        checkbox.addEventListener("change", () => {
+            toggleTask(todo.indexOf(item)); // Toggle the task's disabled state
         });
-        todoList.appendChild(p);
-    })
+
+        // Creating span element for todo text
+        const todoText = document.createElement("span");
+        // Setting class based on whether the item is disabled, to apply correct styling
+        todoText.className = item.disabled ? "disabled" : "";
+        todoText.textContent = item.text; // Seting text content of the span to the todo item's text
+        // Add an event listener to the text to handle the click event
+        todoText.addEventListener("click", () => {
+            editTask(todo.indexOf(item));  // Edit the task when the text is clicked (assuming editTask is defined)
+        });
+
+        // Create a delete button for the todo item
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Remove"; // Set the button text
+        deleteButton.classList.add("delete-button"); // Add a class for styling
+        // Add an event listener to the delete button to handle the click event
+        deleteButton.addEventListener("click", () => {
+            removeTodo(item.id); // Remove the task when the button is clicked
+        });
+
+        // Append the checkbox, text, and delete button to the container
+        todoContainer.appendChild(checkbox);
+        todoContainer.appendChild(todoText);
+        todoContainer.appendChild(deleteButton);
+
+        // Append the container to the todo list
+        todoList.appendChild(todoContainer);
+    });
+    
+    // Update the todo count
+    todoCount.textContent = todo.length; // Display the current number of todos
+}
+
+const saveToLocalStorage = () => {
+    localStorage.setItem("todo", JSON.stringify(todo));
 }
